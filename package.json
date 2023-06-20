@@ -1,0 +1,19 @@
+{
+  "name": "jw-authorize",
+  "version": "1.0.0",
+  "description": "小程序授权，获取用户手机号",
+  "main": "src/index.vue",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "bin",
+  "license": "MIT",
+  "keywords": [
+    "uni components",
+    "authorize"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/makebin/jw-authorize.git"
+  }
+}
