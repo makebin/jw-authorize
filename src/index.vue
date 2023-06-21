@@ -73,6 +73,7 @@ export default {
 		close() {
 			this.isShow = false;
 		},
+		//获取用户信息授权
 		getuserinfo(e) {
 			let {
 				detail
@@ -95,9 +96,9 @@ export default {
 							reject(err)
 						})
 					})
-				}).then(e => {
+				}).then(meta => {
 					this.$emit("success", {
-						e,
+						meta,
 						scene: 'getuserinfo'
 					});
 				}).catch((err) => {
@@ -117,13 +118,14 @@ export default {
 				});
 			}
 		},
+		//获取手机号授权
 		getPhoneNumber(e) {
 			let {
 				detail
 			} = e;
 			if (detail.errMsg == "getPhoneNumber:ok") {
 				this.$emit("success", {
-					detail,
+					meta: detail,
 					scene: 'getPhoneNumber'
 				});
 			} else {
