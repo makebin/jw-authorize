@@ -37,7 +37,7 @@ export default {
 		//开放能力
 		openType: {
 			type: String,
-			default: 'getPhoneNumber'
+			default: 'getUserInfo'
 		}
 	}
 }

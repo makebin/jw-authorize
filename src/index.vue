@@ -19,7 +19,7 @@
 						同意
 					</button>
 					<button v-if="openType === 'getUserInfo'" class="jw-button get-phone-number-button"
-						open-type="getUserInfo" @getuserinfo="getuserinfo">
+						@click="getuserinfo">
 						同意
 					</button>
 				</slot>
@@ -29,6 +29,34 @@
 </template>
 
 <script>
+	const silentLogin = function() {
+		return new Promise((resolve, reject) => {
+			uni.login({
+				success(res) {
+					resolve(res.code)
+				},
+				fail(err) {
+					reject(err)
+				}
+			})
+		})
+	}
+	const getUserProfile = function() {
+		return new Promise((resolve, reject) => {
+			uni.getUserProfile({
+				lang: 'zh_CN',
+				desc: '用户登录',
+				success: (res) => {
+					resolve(res)
+				},
+				// 失败回调
+				fail: (err) => {
+					reject(err)
+				}
+			})
+		})
+	};
+
 	import props from './props.js';
 	export default {
 		name: "jw-authorize",
@@ -44,36 +72,55 @@
 			},
 			close() {
 				this.isShow = false;
-				// #ifdef APP-PLUS
-				plus.runtime.quit();
-				// #endif
 			},
+			//获取用户信息授权
 			getuserinfo(e) {
-				let {
-					detail
-				} = e;
-				if (detail.errMsg == "getuserinfo:ok") {
+
+				let loginFunc = silentLogin();
+				let profile = getUserProfile();
+				loginFunc.then(code => {
+					return code
+				}).then(code => {
+					return new Promise((resolve, reject) => {
+						profile.then(res => {
+							resolve({
+								code,
+								iv: res.iv,
+								encryptedData: res.encryptedData,
+								signature: res.signature,
+								rawData: res.rawData,
+							})
+						}).catch(err => {
+							reject(err)
+						})
+					})
+				}).then(meta => {
 					this.$emit("success", {
-						detail,
-						type: 'getuserinfo'
+						meta,
+						scene: 'getuserinfo',
 					});
-				} else {
-					uni.showModal({
-						title: '提示',
-						content: `无法获取用户信息 ${detail.errMsg}`,
-						showCancel: false,
-						confirmText: '关闭'
-					});
-				}
+				}).catch((err) => {
+					console.log(err)
+					uni.showToast({
+						title: err.message || '登录异常',
+						icon: 'success',
+						mask: true
+					})
+				}).finally(() => {
+					this.isShow = false;
+				});
+
 			},
+			//获取手机号授权
 			getPhoneNumber(e) {
+				this.isShow = false;
 				let {
 					detail
 				} = e;
 				if (detail.errMsg == "getPhoneNumber:ok") {
 					this.$emit("success", {
-						detail,
-						type: 'getPhoneNumber'
+						meta: detail,
+						scene: 'getPhoneNumber'
 					});
 				} else {
 					uni.showModal({
@@ -83,6 +130,7 @@
 						confirmText: '关闭'
 					});
 				}
+
 			},
 			// 禁止滚动
 			clear() {
